@@ -430,6 +430,39 @@ input[type="date"].text-input { font-size: 17px; min-width: 0; }
 /* 창 아래 버튼 줄: 네이버 버튼 글자가 잘리지 않게 — 한 줄에 안 들어가면 두 줄로 */
 .modal .btns .btn-naver { min-width: max-content; }
 
+/* v1.7 제목 화면의 네이버 로그인 — [네이버 로그인]이 큰 단추, [로그인 없이 …]는 작은 흰 단추 */
+.title-login { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+/* 처음 접속: 서버 응답을 기다리는 동안 로그인 단추 자리만 잡아 둔다(보이지 않고 누를 수도 없음) */
+.title-login.wait > .btn, .title-login.wait > .title-login-note { visibility: hidden; animation: none; }
+.title-login-wait { position: absolute; left: 0; right: 0; top: 50%; transform: translateY(-50%); margin: 0; white-space: nowrap; font-family: var(--font-display); font-size: 14px; color: #fff; text-shadow: 0 1px 0 var(--leaf-d), 0 0 4px var(--leaf-d); }
+.btn.title-naver { min-width: 236px; gap: 9px; animation: breathe 1.6s ease-in-out infinite; box-shadow: 0 5px 0 #02974A, 0 10px 22px rgba(0,80,40,.35); }
+.btn.title-naver .naver-n { width: 19px; height: 19px; margin-left: 0; }
+.title-login-note { margin: 4px 0 0; font-family: var(--font-display); font-size: 13px; color: #fff; text-shadow: 0 1px 0 var(--leaf-d), 0 0 4px var(--leaf-d); }
+/* 작은 단추가 되어도 가운데 위치는 큰 [목장 시작하기](58px) 때와 같게(위아래 7px) — 바뀌는 순간 누르던 손가락이 빗나가지 않게 */
+#btnStart.title-guest { animation: none; min-height: 44px; margin: 7px 0; padding: 0 22px; font-size: 17px; border-radius: 16px; --c: rgba(255,255,255,.95); --cd: rgba(71,154,46,.55);
+  color: var(--leaf-d); text-shadow: none; box-shadow: 0 4px 0 var(--cd), 0 6px 14px rgba(40,80,20,.25); }
+.title-linked { display: inline-flex; align-items: center; gap: 6px; margin: 2px 0 0; padding: 4px 13px 4px 5px; border-radius: 999px; background: rgba(255,255,255,.93);
+  color: #02793C; font-family: var(--font-display); font-size: 14px; box-shadow: 0 3px 0 rgba(0,0,0,.08); }
+.title-linked .nv-badge { width: 22px; height: 22px; border-radius: 7px; box-shadow: none; }
+/* 낮은 화면(가로로 든 휴대폰): 제목 글자를 줄이고 안내 한 줄을 접어, 단추들이 아래 저작권 줄과 겹치지 않게 */
+@media (max-height: 560px) {
+  .title-kicker { display: none; }
+  .title-inner { gap: 6px; padding-top: calc(var(--safe-t) + 4vh); padding-bottom: calc(var(--safe-b) + 44px); }
+  .title-logo span { font-size: clamp(36px, 15vh, 64px); }
+  .title-logo small { margin-top: 4px; font-size: clamp(20px, 8vh, 34px); }
+  .title-login-note { display: none; }
+  .btn.title-naver { min-height: 48px; font-size: 19px; }
+  #btnStart.title-guest { min-height: 38px; margin: 0; font-size: 15px; }
+}
+
+/* 아주 좁은 화면(접는 폰의 바깥 화면 등 340px 이하): 단추·안내 글자가 화면 밖으로 나가지 않게 */
+@media (max-width: 340px) {
+  .title-login { max-width: 100%; }
+  .btn.title-naver { min-width: 0; padding: 0 18px; font-size: 19px; }
+  .title-login-note, .title-login-wait { font-size: 12px; white-space: normal; }
+  #btnStart.title-guest { padding: 0 16px; font-size: 16px; }
+}
+
 /* v1.5 바탕화면에 설치 */
 .btn.title-install { --c: rgba(255,255,255,.94); --cd: rgba(71,154,46,.55); color: var(--leaf-d); text-shadow: none; margin-top: 2px; }
 .btn.title-install .ic20 { background-size: contain; }
@@ -508,7 +541,9 @@ input[type="date"].text-input { font-size: 17px; min-width: 0; }
       <p class="title-kicker">키우고 · 만들고 · 배송하는</p>
       <h1 class="title-logo"><span>신화목장</span><small>타이쿤</small></h1>
       <div class="title-gap"></div>
+      <div id="titleLogin" class="title-login" hidden></div>
       <button id="btnStart" class="btn btn-big" type="button">목장 시작하기</button>
+      <p id="titleLinked" class="title-linked" hidden></p>
       <p id="titleNote" class="title-note">소리를 켜면 더 즐거워요 🔊</p>
       <button id="btnInstall" class="btn btn-sm title-install" type="button" hidden><span class="ic20" aria-hidden="true"></span><span>바탕화면에 설치</span></button>
     </div>
@@ -11830,10 +11865,11 @@ const SR = {};
  *               비워 두면('') 테스트 링크가 꺼져요. 비밀값 자체는 코드에 들어 있지 않아요.
  * 네이버 로그인(v1.4)은 여기서 고칠 것이 없어요 — 서버 [설정] 시트의 NAVER_CLIENT_ID·NAVER_LOGIN_OPEN 으로 켜고 꺼요.
  * 테스터 지정·운영자 코인 지급(v1.6)도 서버 시트에서 해요 — [플레이어] '테스터(Y/N)' 칸에 Y, 메뉴 「선택 플레이어 → 코인 지급…」.
+ * 첫 화면의 [네이버 로그인](v1.7)은 서버가 네이버 로그인을 열어 두었을 때(NAVER_LOGIN_OPEN=Y) 또는 테스트 목장에 보여요.
  */
 /* SR은 이 함수 안에서만 */
 SR.CONFIG = {
-  VERSION: '1.6.0',
+  VERSION: '1.7.0',
   TITLE: '신화목장 타이쿤',
   SERVER_URL: 'https://script.google.com/macros/s/AKfycbwGEjjmnhrW0WnHJz0WkAXiHLlkAtlq6onudAWx5x_5lG0jfFu998FubrgyxWeytkvRuQ/exec',
   STORE_URL: 'https://smartstore.naver.com/shmeat_',
@@ -16603,6 +16639,7 @@ SR.CONFIG = {
     return b;
   }
   UI.naverBtn = naverBtn;
+  UI.naverMark = naverMark;
   const nvHead = (title, sub) => el('div', { class: 'row nowrap' }, [el('span', { class: 'nv-badge' }, [naverMark(20)]), el('div', { class: 'grow' }, [
     el('h3', { text: title }), sub ? el('p', { class: 'muted', text: sub }) : null
   ])]);
@@ -17316,7 +17353,7 @@ SR.CONFIG = {
       ['store', '스토어', '[스토어]에서 ' + C.STORE_NAME + '로 바로 갈 수 있어요. 스토어에서 산 주문을 [구매 적립]에 신청하면 확인 후 결제금액의 ' + fmtPct(SR.Net.info && SR.Net.info.purchase ? SR.Net.info.purchase.ratePct : 5) + '를 코인으로 드려요. 게임 코인은 돈이나 실물로 바꿀 수 없어요.']
     ];
     items.push(['plus', '바탕화면에 설치', '[설정 → 기본]의 「바탕화면에 설치하기」로 PC·휴대폰 바탕화면(홈 화면)에 신화목장 아이콘을 만들 수 있어요. 아이콘을 누르면 앱처럼 바로 열리고, 진행 기록은 그대로예요.']);
-    if (SR.Net.naverAvailable() || S.g.net.linked) items.push(['lock', '네이버 로그인', '[설정 → 기본]에서 네이버로 로그인하면 진행 기록이 서버에 보관돼요. 휴대폰을 바꿔도 같은 네이버 계정으로 로그인하면 이어서 할 수 있어요. 한 번에 한 기기에서만 이어서 할 수 있어요.']);
+    if (SR.Net.naverAvailable() || S.g.net.linked) items.push(['lock', '네이버 로그인', '첫 화면이나 [설정 → 기본]에서 네이버로 로그인하면 진행 기록이 서버에 보관돼요. 휴대폰을 바꿔도 같은 네이버 계정으로 로그인하면 이어서 할 수 있어요. 한 번에 한 기기에서만 이어서 할 수 있어요.']);
     items.forEach(([ic, t, d]) => body.appendChild(el('div', { class: 'card' }, [ico(ic, 40), el('div', { class: 'grow' }, [el('h3', { text: t }), el('p', { class: 'muted', text: d })])])));
     body.appendChild(btn('처음 안내 다시 보기', 'btn-ghost', () => { UI.close(); UI.tutorialRestart(); }));
   }
@@ -17524,12 +17561,14 @@ SR.CONFIG = {
 
 /* ==== game/07_net.js ==== */
 /* 서버 통신 — Apps Script 웹앱(헤더 없는 POST, text/plain) · v1.2 구매 적립 · v1.4 네이버 로그인·진행 기록 보관
- * · v1.6 운영자 코인 지급(gifts/giftAck)·서버가 지정한 테스터(account.tester) */
+ * · v1.6 운영자 코인 지급(gifts/giftAck)·서버가 지정한 테스터(account.tester)
+ * · v1.7 서버의 네이버 로그인 안내를 이 기기에 기억(다음 접속 때 첫 화면에 로그인 버튼이 바로 보이게) */
 (function () {
   'use strict';
   const U = SR.U, S = SR.S, C = SR.CONFIG, bus = SR.bus;
   const N = SR.Net = { info: null, account: null, status: 'off', lastSyncOk: 0, helloFailAt: 0, paused: false, skew: 0 };
   const NV_KEY = 'shinhwa_ranch_naver';            // 네이버 로그인 다녀오기: {state, at, back} (돌아오면 바로 지움)
+  const NV_INFO = 'shinhwa_ranch_nvinfo';          // 서버가 마지막으로 알려 준 네이버 로그인 안내 {clientId, open, flow} (공개 값만)
   const NV_AUTHORIZE = 'https://nid.naver.com/oauth2.0/authorize';
   const UPLOAD_EVERY = 180000;                     // 진행 기록 올리기 간격(3분, 바뀐 게 있을 때만)
   const TIMEOUT = 15000;
@@ -17563,6 +17602,28 @@ SR.CONFIG = {
   N.post = post;
   const delay = ms => new Promise(res => setTimeout(res, ms));
 
+  /* 네이버 로그인 안내(서버 hello 의 naver): 모양을 다듬고, 마지막으로 받은 것을 이 기기에 기억해 둔다.
+   * 다음 접속 때 서버 응답(1~3초)을 기다리지 않고 첫 화면에 로그인 버튼을 바로 보이기 위한 것 — 서버 응답이 오면 그 값으로 바뀐다 */
+  const cleanNaver = nv => {
+    nv = nv && typeof nv === 'object' ? nv : {};
+    return { clientId: typeof nv.clientId === 'string' && /^[A-Za-z0-9_-]{5,64}$/.test(nv.clientId) ? nv.clientId : '', open: nv.open === true, flow: nv.flow === 'code' ? 'code' : 'token' };
+  };
+  let nvMemo, nvHad = false;                       // nvMemo undefined = 아직 읽지 않음 · nvHad = 기억해 둔 안내가 있었는가
+  function rememberedNaver() {
+    if (nvMemo === undefined) {
+      let raw = null;
+      try { raw = U.store.get(NV_INFO); nvMemo = cleanNaver(JSON.parse(raw || 'null')); } catch (e) { nvMemo = cleanNaver(null); }
+      nvHad = !!raw;
+    }
+    return nvMemo;
+  }
+  function rememberNaver(nv) {
+    const old = rememberedNaver();
+    nvMemo = nv;
+    // 꺼져 있다는 안내도 기억한다(다음 접속 때 로그인 자리를 잡아 두고 기다리지 않게). 같은 값이면 다시 쓰지 않음
+    if (!nvHad || old.clientId !== nv.clientId || old.open !== nv.open || old.flow !== nv.flow) { U.store.set(NV_INFO, JSON.stringify(nv)); nvHad = true; }
+  }
+
   /** hello → {notice, storeUrl, purchase:{open, ratePct, coinPerWon, maxAmount, maxDays, dailyLimit, notice}} */
   N.hello = function (force) {
     if (!N.enabled()) return Promise.resolve(null);
@@ -17570,8 +17631,8 @@ SR.CONFIG = {
     return post({ action: 'hello' }).then(r => {
       if (r && r.ok) {
         if (!r.purchase || typeof r.purchase !== 'object') r.purchase = { open: false };
-        const nv = r.naver && typeof r.naver === 'object' ? r.naver : {};
-        r.naver = { clientId: typeof nv.clientId === 'string' && /^[A-Za-z0-9_-]{5,64}$/.test(nv.clientId) ? nv.clientId : '', open: nv.open === true, flow: nv.flow === 'code' ? 'code' : 'token' };
+        r.naver = cleanNaver(r.naver);
+        rememberNaver(r.naver);
         N.info = r; helloAt = Date.now(); N.helloFailAt = 0; bus.emit('netInfo', r);
       } else N.helloFailAt = Date.now();
       return N.info;
@@ -17734,7 +17795,9 @@ SR.CONFIG = {
    *  · 연결된 목장은 3분마다(바뀐 게 있으면)·화면을 떠날 때 진행 기록을 올린다.
    *  · 다른 기기에서 같은 네이버 계정으로 이어하면 이 기기 토큰이 무효 → 서버가 MOVED → 이 기기는 보내기를 멈춤(moved).
    * ========================================================= */
-  N.naverInfo = () => (N.info && N.info.naver) || { clientId: '', open: false, flow: 'token' };
+  N.naverInfo = () => (N.info && N.info.naver) || rememberedNaver();     // 서버 응답 전에는 지난번에 받은 안내
+  /** 네이버 로그인을 쓸 수 있는지 이미 아는가 — 서버 응답을 받았거나, 지난번 안내를 기억하고 있거나, 서버를 쓰지 않는 게임 */
+  N.naverKnown = () => { rememberedNaver(); return !N.enabled() || !!N.info || nvHad; };
   /** 이 목장에 네이버 로그인 버튼을 보일까 (모두에게 열렸거나, 테스트 목장 — 서버가 지정한 테스터·운영자 테스트 링크) */
   N.naverAvailable = () => N.enabled() && !!N.naverInfo().clientId && (N.naverInfo().open || S.isTester());
   /** 서버가 구매 적립에 네이버 로그인을 요구하는가 */
@@ -17984,9 +18047,12 @@ SR.CONFIG = {
       U.el('h2', { text: title }), lead ? U.el('p', { class: 'lead', text: lead }) : null, extra || null, row.childNodes.length ? row : null
     ]));
     wrap.hidden = false;
+    titleInert(true);
     return wrap;
   }
-  function unblock() { const w = document.getElementById('blocker'); if (w) w.remove(); }
+  function unblock() { const w = document.getElementById('blocker'); if (w) w.remove(); titleInert(false); }
+  /** 가림막이 떠 있는 동안 그 뒤의 제목 화면 단추(시작·네이버 로그인·설치)를 키보드로도 누를 수 없게 한다 */
+  function titleInert(on) { const t = document.getElementById('title'); if (t) { try { t.inert = !!on; } catch (e) { /* 무시 */ } } }
 
   /* ---------- 한 번에 한 창에서만 (두 창이 같은 저장을 서로 덮어쓰지 않게) ----------
    * _owner : 지금 게임을 쥐고 있는 창(2초마다 갱신). 새 창은 이게 살아 있으면 먼저 물어본다.
@@ -18064,6 +18130,9 @@ SR.CONFIG = {
   const afterStart = [];           // 시작한 뒤 할 일(네이버 로그인 전에 보던 화면 다시 열기 등)
   const netOpts = {};              // N.start 옵션(uploadNow: 막 네이버에 연결 → 바로 올림)
   const NV_MSG = 'shinhwa_ranch_naver_msg';   // 네이버로 이어하기 → 새로고침 뒤 보여 줄 안내
+  const SUM_KEY = 'shinhwa_ranch_boot_sum';   // 제목 화면에서 네이버 로그인하러 가기 전의 '떠나 있던 동안 소식'(돌아와 시작할 때 보여 줌)
+  let titleSave = false;           // 제목 화면: 이 기기에 이어서 할 목장이 있는가
+  let helloTried = false;          // 이번 접속의 첫 서버 안내 요청이 끝났는가(성공·실패 모두)
 
   function boot() {
     // 네이버 로그인에서 돌아왔으면 토큰이 든 주소부터 지운다(다른 일보다 먼저)
@@ -18093,6 +18162,14 @@ SR.CONFIG = {
     const away = Date.now() - (S.g.last || Date.now());
     if (hadSave && away > 15000) bootSummary = Sim.catchUp(away);
     lastSim = Date.now();
+    // 제목 화면에서 네이버 로그인을 다녀오면 가기 직전의 저장 때문에 '떠나 있던 시간'이 0이 된다 → 가기 전에 맡겨 둔 소식을 되찾는다
+    // (같은 탭에서 30분 안에 네이버에서 돌아온 경우에만. 새로고침·다른 접속에서는 버림)
+    try {
+      const kept = JSON.parse(window.sessionStorage.getItem(SUM_KEY) || 'null');
+      window.sessionStorage.removeItem(SUM_KEY);
+      if (!bootSummary && naverRet && kept && typeof kept === 'object' && kept.sum && typeof kept.sum === 'object' &&
+          Array.isArray(kept.sum.hungry) && Math.abs(Date.now() - (+kept.at || 0)) < 30 * 60000) bootSummary = kept.sum;
+    } catch (e) { /* 무시 */ }
     // 글꼴이 늦게 오면 글자 들어간 그림을 다시 만든다
     try {
       if (document.fonts && document.fonts.load) {
@@ -18110,11 +18187,16 @@ SR.CONFIG = {
     if (!U.store.ok) $('#titleNote').textContent = '이 브라우저는 저장이 안 돼요. 진행이 유지되지 않을 수 있어요.';
     else if (nvMsg && nvMsg.kind === 'restored') $('#titleNote').textContent = '네이버 계정의 목장을 불러왔어요 · ' + S.g.name + ' Lv.' + S.g.level;
     else if (hadSave && (S.g.named || S.g.level > 1 || S.g.tut.done)) $('#titleNote').textContent = S.g.name + ' · Lv.' + S.g.level + ' 이어서 하기';
+    titleSave = !!(hadSave && (S.g.named || S.g.level > 1 || S.g.tut.done));
     bindInput();
     requestAnimationFrame(loop);
     if (C.DEV) window.__SR = SR;
     titleInstall();
-    N.hello().catch(() => {});      // 서버 안내(네이버 로그인 버튼 표시 여부 등)를 시작 전에 받아 둔다
+    titleLogin();
+    bus.on('netInfo', titleLogin);       // 서버 안내가 오면(또는 바뀌면) 다시 그림
+    bus.on('netLinked', titleLogin);
+    // 서버 안내(네이버 로그인 버튼 표시 여부 등)를 시작 전에 받아 둔다. 끝나면(실패해도) 제목 화면의 로그인 자리를 정리한다
+    N.hello().catch(() => null).then(() => { helloTried = true; titleLogin(); });
     if (naverRet) { const ret = naverRet; naverRet = null; handleNaverReturn(ret); }
     else if (nvMsg && nvMsg.kind === 'restored') {
       afterStart.push(() => UI.toast('네이버 계정에 보관된 목장을 불러왔어요!', 'good', 'check'));
@@ -18139,6 +18221,42 @@ SR.CONFIG = {
     });
     bus.on('appInstall', upd);
     upd();
+  }
+
+  /* v1.7 제목 화면의 네이버 로그인 — 서버가 네이버 로그인을 열어 두었거나(NAVER_LOGIN_OPEN=Y) 이 목장이 테스트 목장일 때 보인다.
+   *  · 아직 연결 안 한 목장      : [네이버 로그인](큰 단추) + [로그인 없이 시작하기 / 이어서 하기](작은 단추)
+   *  · 연결된 목장               : [목장 시작하기] + '네이버 계정에 연결됨' 표시
+   *  · 다른 기기에서 이어하는 중 : [네이버로 다시 로그인] + [로그인 없이 이어서 하기]
+   * 서버 안내는 지난번에 받은 것을 기억해 두었다가 바로 쓰고(07_net), 새 안내가 오면 다시 그린다.
+   *  · 처음 접속(기억해 둔 안내가 없고 서버 응답도 아직) : 로그인 단추 자리만 잡아 두고 '확인하고 있어요…' — 응답이 온 뒤
+   *    [시작] 단추가 밀려 내려가 엉뚱한 단추를 누르는 일이 없게. 서버가 로그인을 열지 않았으면 그 자리는 접는다. */
+  function titleLogin() {
+    if (started) return;
+    const box = $('#titleLogin'), sb = $('#btnStart'), chip = $('#titleLinked');
+    if (!box || !sb || !chip) return;
+    const net = S.g.net;
+    const can = U.store.ok && N.naverAvailable();          // 저장소를 못 쓰는 브라우저는 로그인 왕복을 확인할 수 없다
+    const known = helloTried || N.naverKnown();
+    const mode = net.linked && !net.moved ? 'linked' : !U.store.ok ? 'plain' : !known ? 'wait' : !can ? 'plain' : net.moved ? 'moved' : 'guest';
+    if (box.dataset.mode === mode) return;
+    box.dataset.mode = mode;
+    const ask = mode === 'guest' || mode === 'moved';
+    box.textContent = '';
+    chip.textContent = '';
+    if (ask || mode === 'wait') {
+      // 'wait' 는 같은 크기의 자리만 차지한다(단추는 보이지 않고 누를 수도 없음)
+      box.appendChild(UI.naverBtn(mode === 'moved' ? '네이버로 다시 로그인' : '네이버 로그인', 'title', 'btn-big title-naver'));
+      box.appendChild(U.el('p', { class: 'title-login-note', text: mode === 'moved' ? '이 목장은 다른 기기에서 이어서 하고 있어요' : '로그인하면 목장이 서버에 보관돼요' }));
+      if (mode === 'wait') box.appendChild(U.el('p', { class: 'title-login-wait', text: '접속 정보를 확인하고 있어요…' }));
+    } else if (mode === 'linked') {
+      chip.appendChild(U.el('span', { class: 'nv-badge' }, [UI.naverMark(12)]));
+      chip.appendChild(U.el('span', { text: '네이버 계정에 연결됨' }));
+    }
+    box.classList.toggle('wait', mode === 'wait');
+    box.hidden = !(ask || mode === 'wait');
+    chip.hidden = mode !== 'linked';
+    sb.classList.toggle('title-guest', ask);
+    sb.textContent = !ask ? '목장 시작하기' : titleSave ? '로그인 없이 이어서 하기' : '로그인 없이 시작하기';
   }
 
   /* =========================================================
@@ -18170,18 +18288,24 @@ SR.CONFIG = {
   }
   /** 이 기기 목장이 막 시작한 새 목장인가(이름 짓기·튜토리얼 전) */
   const freshRanch = () => !S.g.named && S.g.level <= 1 && !S.g.tut.done && !(S.g.stats.deliveries > 0);
+  /** 안내창을 닫는다: 제목 화면에서 로그인하러 갔던 것이면 제목 화면으로 돌아가고, 아니면 게임을 시작한다 */
+  function leave(back) {
+    if (back === 'title' && !started) { unblock(); titleLogin(); return; }
+    goStart(back);
+  }
   function naverError(title, lead, back, retry) {
     blocker(title, lead, [
       retry ? { label: '다시 시도', cls: 'btn-blue', fn: retry } : null,
-      { label: '게임으로', cls: 'btn-orange', fn: () => goStart(back) }
+      { label: back === 'title' ? '돌아가기' : '게임으로', cls: 'btn-orange', fn: () => leave(back) }
     ]);
   }
   function handleNaverReturn(ret) {
-    const back = ret.back || '';
+    // 어디서 시작한 로그인인지 모르는 확인 실패(다른 브라우저·다른 창에서 시작)는 제목 화면에서 다시 하도록
+    const back = ret.back || (ret.error === 'STATE' ? 'title' : '');
     if (ret.error) {
       const cancel = ret.error === 'access_denied';
       naverError(cancel ? '네이버 로그인을 취소했어요' : '네이버 로그인을 마치지 못했어요',
-        cancel ? '[설정]에서 언제든 다시 로그인할 수 있어요.'
+        cancel ? '첫 화면이나 [설정]에서 언제든 다시 로그인할 수 있어요.'
           : ret.error === 'STATE' ? '로그인 확인 시간이 지났거나 다른 창에서 시작한 로그인이에요. 게임에서 [네이버 로그인]을 다시 눌러 주세요.'
             : '잠시 후 다시 시도해 주세요. (' + String(ret.error).slice(0, 40) + ')', back);
       return;
@@ -18256,7 +18380,7 @@ SR.CONFIG = {
           { label: '돌아가기', cls: 'btn-ghost', fn: () => chooseRanch(r, back) },
           { label: '바꾸기', cls: 'btn-red', fn: () => linkHere(r, back, false) }
         ]) },
-      { label: '나중에 하기', cls: 'btn-ghost', fn: () => goStart(back) }
+      { label: '나중에 하기', cls: 'btn-ghost', fn: () => leave(back) }
     ], extra);
   }
 
@@ -18330,6 +18454,9 @@ SR.CONFIG = {
   function start(summary) {
     if (started) return;
     started = true;
+    // 제목 화면에서 방금 네이버 로그인을 권했으면(그 단추가 보이는 채로 시작), 시작 직후의 '새 기능' 안내창은 띄우지 않는다
+    const tl = $('#titleLogin');
+    if (tl && (tl.dataset.mode === 'guest' || tl.dataset.mode === 'moved') && !S.g.flags.nvNews) S.g.flags.nvNews = 1;
     if (A) {
       try {
         A.init(); A.unlock();
@@ -18388,7 +18515,12 @@ SR.CONFIG = {
     requestAnimationFrame(loop);
   }
   document.addEventListener('visibilitychange', () => { if (document.hidden && started) S.save(); });
-  window.addEventListener('pagehide', () => { if (started) S.save(); Lock.release(); });
+  window.addEventListener('pagehide', () => {
+    if (started) S.save();
+    // 시작 전에 떠남(제목 화면에서 네이버 로그인하러 감): '떠나 있던 동안 소식'을 이 탭에 맡겨 둔다
+    else if (bootSummary) { try { window.sessionStorage.setItem(SUM_KEY, JSON.stringify({ at: Date.now(), sum: bootSummary })); } catch (e) { /* 무시 */ } }
+    Lock.release();
+  });
 
   /* 입력: 끌어서 이동, 톡 눌러서 선택, 두 손가락으로 확대·축소(가운데를 따라 이동), 휠·키보드 확대 */
   function bindInput() {
