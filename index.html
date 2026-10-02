@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#8FD06A">
 <meta name="description" content="닭·돼지·소를 키우고 가공해서 손님에게 배송하는 목장 경영 타이쿤 게임">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="신화목장">
+<meta name="application-name" content="신화목장">
 <title>신화목장 타이쿤</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -424,6 +430,14 @@ input[type="date"].text-input { font-size: 17px; min-width: 0; }
 /* 창 아래 버튼 줄: 네이버 버튼 글자가 잘리지 않게 — 한 줄에 안 들어가면 두 줄로 */
 .modal .btns .btn-naver { min-width: max-content; }
 
+/* v1.5 바탕화면에 설치 */
+.btn.title-install { --c: rgba(255,255,255,.94); --cd: rgba(71,154,46,.55); color: var(--leaf-d); text-shadow: none; margin-top: 2px; }
+.btn.title-install .ic20 { background-size: contain; }
+.app-card { border-color: #F3C77C; background: #FFF8EA; }
+.app-badge { position: relative; flex: none; width: 40px; height: 40px; border-radius: 11px; overflow: hidden; background: linear-gradient(#BDE88A, #7CBF4F); box-shadow: 0 2px 0 rgba(71,154,46,.55); }
+.app-badge img { position: absolute; left: 50%; bottom: -3px; width: 38px; height: 38px; transform: translateX(-50%); }
+.app-note { margin: 0; font-size: 12px; }
+
 </style>
 </head>
 <body>
@@ -496,6 +510,7 @@ input[type="date"].text-input { font-size: 17px; min-width: 0; }
       <div class="title-gap"></div>
       <button id="btnStart" class="btn btn-big" type="button">목장 시작하기</button>
       <p id="titleNote" class="title-note">소리를 켜면 더 즐거워요 🔊</p>
+      <button id="btnInstall" class="btn btn-sm title-install" type="button" hidden><span class="ic20" aria-hidden="true"></span><span>바탕화면에 설치</span></button>
     </div>
     <p class="title-foot">© 신화미트 · 모든 그림과 소리는 직접 코드로 만들었어요</p>
   </div>
@@ -11814,10 +11829,11 @@ const SR = {};
  *               플래그가 붙어 자동 승인되지 않아요(운영자가 시트에서 직접 확인).
  *               비워 두면('') 테스트 링크가 꺼져요. 비밀값 자체는 코드에 들어 있지 않아요.
  * 네이버 로그인(v1.4)은 여기서 고칠 것이 없어요 — 서버 [설정] 시트의 NAVER_CLIENT_ID·NAVER_LOGIN_OPEN 으로 켜고 꺼요.
+ * 테스터 지정·운영자 코인 지급(v1.6)도 서버 시트에서 해요 — [플레이어] '테스터(Y/N)' 칸에 Y, 메뉴 「선택 플레이어 → 코인 지급…」.
  */
 /* SR은 이 함수 안에서만 */
 SR.CONFIG = {
-  VERSION: '1.4.0',
+  VERSION: '1.6.0',
   TITLE: '신화목장 타이쿤',
   SERVER_URL: 'https://script.google.com/macros/s/AKfycbwGEjjmnhrW0WnHJz0WkAXiHLlkAtlq6onudAWx5x_5lG0jfFu998FubrgyxWeytkvRuQ/exec',
   STORE_URL: 'https://smartstore.naver.com/shmeat_',
@@ -11833,8 +11849,9 @@ SR.CONFIG = {
     '3. 네이버 로그인(선택): 네이버로 로그인하면 진행 기록 사본을 서버에 보관해 다른 기기에서도 이어서 할 수 있습니다. 네이버 계정 하나에는 목장 하나만 보관되며, 한 번에 한 기기에서만 이어서 할 수 있습니다(다른 기기에서 이어하면 먼저 쓰던 기기의 진행은 서버에 보관되지 않습니다). 연결은 [설정]에서 언제든 해제할 수 있습니다.\n' +
     '4. 게임 코인과 게임 속 물건은 돈이나 실제 상품으로 바꿀 수 없습니다. 실물 경품 교환은 하지 않습니다.\n' +
     '5. 구매 적립은 게임 코인으로만 드립니다. 운영자가 실제 스토어 주문을 확인한 뒤 승인하며, 입력한 정보가 주문과 다르면 반려될 수 있습니다. 구매 적립은 네이버로 로그인한 목장만 신청하도록 운영될 수 있으며, 적립률과 조건은 운영 사정에 따라 바뀔 수 있습니다.\n' +
-    '6. 게임을 비정상적으로 조작하거나 여러 계정·남의 주문으로 적립을 받는 행위는 금지되며, 확인되면 적립이 취소되거나 이용이 제한될 수 있습니다.\n' +
-    '7. 문의: 신화미트 스마트스토어 톡톡',
+    '6. 이벤트 선물이나 오류 보정을 위해 운영자가 게임 코인을 지급하거나 조정(회수)할 수 있습니다.\n' +
+    '7. 게임을 비정상적으로 조작하거나 여러 계정·남의 주문으로 적립을 받는 행위는 금지되며, 확인되면 적립이 취소되거나 이용이 제한될 수 있습니다.\n' +
+    '8. 문의: 신화미트 스마트스토어 톡톡',
   PRIVACY_TEXT: '개인정보 처리 안내\n\n' +
     '· 수집 항목: 목장 이름(닉네임), 무작위 기기 식별값, 게임 진행 기록(레벨·플레이 시간·접속일 등). 구매 적립을 신청할 때만 네이버 아이디·주문번호·구매일·결제금액을 추가로 받습니다. 이름·전화번호·주소는 받지 않습니다.\n' +
     '· 네이버 로그인(선택): 로그인하면 네이버가 이 게임에만 발급하는 회원 식별값을 받아, 알아볼 수 없게 바꾼 값만 계정에 저장하고 진행 기록 사본을 보관합니다. 이름·이메일·전화번호는 받지 않습니다. 별명 제공에 동의하면 별명은 처음 목장 이름을 제안할 때만 쓰고 서버에 저장하지 않습니다. [설정]에서 연결을 해제하면 보관된 진행 기록 사본을 바로 지웁니다.\n' +
@@ -12413,7 +12430,8 @@ SR.CONFIG = {
       net: { deviceId: U.uuid().replace(/-/g, '').slice(0, 24), playerId: '', token: '', nick: '', linked: false, moved: false, saveAt: 0, revs: [] },
       threat: { foxAt: now + 240000, ratAt: now + 300000 },
       rank: 0, flags: {},
-      cashback: { got: {}, ack: {}, total: 0, naverId: '' }     // 구매 적립: 받은 신청번호(다시 받지 않음)·서버에 알릴 번호·받은 코인 합·마지막에 적은 네이버 아이디
+      cashback: { got: {}, ack: {}, total: 0, naverId: '' },    // 구매 적립: 받은 신청번호(다시 받지 않음)·서버에 알릴 번호·받은 코인 합·마지막에 적은 네이버 아이디
+      gifts: { got: {}, ack: {}, total: 0 }                      // v1.6 운영자 코인 지급: 받은 지급번호(다시 받지 않음)·서버에 알릴 번호·받은 코인 합(회수는 세지 않음)
     };
     S.g = g;
     D.PARCELS.forEach(p => { g.parcels[p.id] = { st: p.start ? 'done' : 'locked', end: 0 }; });
@@ -12544,7 +12562,17 @@ SR.CONFIG = {
     S.day().rev += n;
     if (why) S.g.stats.best[why] = (S.g.stats.best[why] || 0) + n;
   };
-  /** 장사 밖에서 받은 코인(구매 적립): 매출·배송 수입에는 넣지 않고 수입원 기록에만 남긴다 */
+  /** 테스트 목장인가 — 운영자가 서버 시트에서 테스터로 지정했거나(testerSrv), 운영자 테스트 링크로 연 목장(tester) */
+  S.isTester = () => !!(S.g && S.g.flags && (S.g.flags.testerSrv || S.g.flags.tester));
+  /** 코인 빼기(운영자 회수): 가진 코인까지만 뺀다. 실제로 뺀 수를 돌려준다(지출 통계에는 넣지 않음) */
+  S.takeCoins = function (n) {
+    n = Math.max(0, Math.floor(n) || 0);
+    const have = Math.max(0, S.g.coins || 0);
+    const t = Math.min(have, n);
+    S.g.coins = have - t;
+    return t;
+  };
+  /** 장사 밖에서 받은 코인(구매 적립·운영자 선물): 매출·배송 수입에는 넣지 않고 수입원 기록에만 남긴다 */
   S.gift = function (n, why) {
     n = Math.max(0, Math.floor(n) || 0);
     if (!n) return 0;
@@ -12657,6 +12685,14 @@ SR.CONFIG = {
     for (const k in cb.ack) if (!idOk(k)) delete cb.ack[k]; else cb.ack[k] = num(cb.ack[k], 0);
     cb.total = Math.max(0, Math.floor(num(cb.total, 0)));
     cb.naverId = typeof cb.naverId === 'string' && /^[a-z0-9._@-]{3,40}$/.test(cb.naverId) ? cb.naverId : '';
+    // 운영자 코인 지급(v1.6) — 구매 적립과 같은 모양
+    if (!obj(g.gifts)) g.gifts = { got: {}, ack: {}, total: 0 };
+    const gf = g.gifts;
+    if (!obj(gf.got)) gf.got = {};
+    if (!obj(gf.ack)) gf.ack = {};
+    for (const k in gf.got) if (!idOk(k)) delete gf.got[k]; else gf.got[k] = num(gf.got[k], 0);
+    for (const k in gf.ack) if (!idOk(k)) delete gf.ack[k]; else gf.ack[k] = num(gf.ack[k], 0);
+    gf.total = Math.max(0, Math.floor(num(gf.total, 0)));
     // 서버 계정(v1.4 네이버 로그인)
     if (!obj(g.net)) g.net = base.net;
     g.net.linked = g.net.linked === true;
@@ -12710,7 +12746,7 @@ SR.CONFIG = {
     if (g.flags.emergencyFeedAt) g.flags.emergencyFeedAt = sh(g.flags.emergencyFeedAt);
     if (g.net && g.net.authFailAt) g.net.authFailAt = sh(g.net.authFailAt);
   };
-  /** 새 목장으로 옮겨도 남기는 기록: 서버 계정(다중 계정 방지·네이버 연결)·받은 구매 적립 번호(두 번 받지 않게) */
+  /** 새 목장으로 옮겨도 남기는 기록: 서버 계정(다중 계정 방지·네이버 연결)·받은 구매 적립 번호와 운영자 지급 번호(두 번 받지 않게) */
   S.carryOver = function (from, to) {
     if (!from || !to) return;
     if (from.net && from.net.deviceId) {
@@ -12721,6 +12757,9 @@ SR.CONFIG = {
     }
     if (from.cashback && typeof from.cashback === 'object') {
       to.cashback = { got: Object.assign({}, from.cashback.got), ack: Object.assign({}, from.cashback.ack), total: 0, naverId: typeof from.cashback.naverId === 'string' ? from.cashback.naverId : '' };
+    }
+    if (from.gifts && typeof from.gifts === 'object') {
+      to.gifts = { got: Object.assign({}, from.gifts.got), ack: Object.assign({}, from.gifts.ack), total: 0 };
     }
   };
   /** 서버에 올릴 진행 기록(JSON 문자열) — 계정 토큰·인증 실패 기록, 구매 적립에 적었던 네이버 아이디는 빼고.
@@ -12904,6 +12943,50 @@ SR.CONFIG = {
     const cb = S.g.cashback;
     trimAcks(cb, Date.now());
     return Object.keys(cb.ack).sort((a, b) => cb.ack[b] - cb.ack[a]).slice(0, ACK_MAX);
+  };
+
+  /* =========================================================
+   * v1.6 운영자 코인 지급 받기 (서버 sync 응답의 gifts / giftAcked) — 구매 적립과 같은 '번호마다 한 번만' 규칙
+   *  gifts = [{id, coins, reason}]  coins > 0 이면 더하고, < 0 이면 회수(가진 코인까지만 뺌).
+   *  받은 번호는 gifts.got 에 남겨 다시 받지 않고, 다음 sync 의 giftAck 로 보낸다. 응답 giftAcked 에 들어오면 뺀다.
+   * ========================================================= */
+  Sim.applyGifts = function (gifts) {
+    const gf = S.g.gifts, now = Date.now(), fresh = [];
+    if (!Array.isArray(gifts)) return fresh;
+    let changed = false;
+    gifts.forEach(c => {
+      if (!c || typeof c !== 'object') return;
+      const id = cleanId(c.id);
+      if (!ID_RE.test(id)) return;
+      if (gf.got[id]) { if (!gf.ack[id]) { gf.ack[id] = now; changed = true; } return; }
+      const n = Number(c.coins);
+      const coins = isFinite(n) ? (n < 0 ? Math.ceil(n) : Math.floor(n)) : NaN;
+      if (!isFinite(coins) || coins === 0 || Math.abs(coins) > 1e9) return;
+      gf.got[id] = now; gf.ack[id] = now; changed = true;
+      let applied = coins;
+      if (coins > 0) { S.gift(coins, 'gift'); gf.total += coins; }
+      else applied = -S.takeCoins(-coins);
+      const reason = typeof c.reason === 'string' ? c.reason.replace(/[\u0000-\u001F\u007F]/g, ' ').trim().slice(0, 60) : '';
+      fresh.push({ id: id, coins: coins, applied: applied, reason: reason });
+    });
+    if (changed) { trimAcks(gf, now); S.save(); }
+    if (fresh.length) bus.emit('gift', fresh);
+    return fresh;
+  };
+  /** 서버가 지급완료로 처리한 지급번호는 giftAck 목록에서 뺀다 */
+  Sim.applyGiftAcked = function (acked) {
+    const gf = S.g.gifts;
+    if (!Array.isArray(acked) || !acked.length) return 0;
+    let n = 0;
+    acked.forEach(v => { const id = cleanId(v); if (id && gf.ack[id] !== undefined) { delete gf.ack[id]; n++; } });
+    if (n) S.save();
+    return n;
+  };
+  /** 다음 sync 에 보낼 giftAck (최근 것부터 최대 50개) */
+  Sim.giftAckList = function () {
+    const gf = S.g.gifts;
+    trimAcks(gf, Date.now());
+    return Object.keys(gf.ack).sort((a, b) => gf.ack[b] - gf.ack[a]).slice(0, ACK_MAX);
   };
 
   /* =========================================================
@@ -15639,7 +15722,7 @@ SR.CONFIG = {
   // 상태가 바뀌면 열린 패널 새로 그리기
   ['packed', 'collected', 'delivered', 'orderOpen', 'orderExpired', 'declined', 'fed', 'cleaned', 'watered', 'brushed', 'healed', 'shipped', 'animalBought',
     'upgraded', 'craftStart', 'craftDone', 'craftCancel', 'parcelDone', 'bought', 'sold', 'vehicleBought', 'vehicleGo', 'vehicleBack', 'vehicleLoading', 'milkReady', 'readyShip', 'sick', 'missionDone', 'levelup', 'grew', 'laid',
-    'animalSold', 'cashback', 'netAccount', 'netInfo', 'netPurchases', 'parcelBuilding', 'netMoved', 'netLinked', 'cloudSaved']
+    'animalSold', 'cashback', 'netAccount', 'netInfo', 'netPurchases', 'parcelBuilding', 'netMoved', 'netLinked', 'cloudSaved', 'appInstall', 'gift', 'tester']
     .forEach(ev => bus.on(ev, () => { dirty = true; }));
   UI.tick = function () {
     const ae = document.activeElement;
@@ -16551,7 +16634,7 @@ SR.CONFIG = {
     } else {
       card.appendChild(nvHead('네이버로 목장 지키기' + (testing ? ' (테스트 중)' : ''), '네이버로 로그인하면 진행 기록이 서버에 보관돼요. 휴대폰을 바꾸거나 브라우저 기록을 지워도 같은 네이버 계정으로 로그인하면 이어서 할 수 있어요.'));
       card.appendChild(naverBtn('네이버 로그인', 'settings'));
-      card.appendChild(el('p', { class: 'muted nv-note', text: '네이버 회원번호를 알아볼 수 없게 바꾼 값과 진행 기록 사본만 보관해요. 이름·이메일·전화번호는 받지 않아요.' + (testing ? ' 지금은 운영자 테스트 목장에만 보여요.' : '') }));
+      card.appendChild(el('p', { class: 'muted nv-note', text: '네이버 회원번호를 알아볼 수 없게 바꾼 값과 진행 기록 사본만 보관해요. 이름·이메일·전화번호는 받지 않아요.' + (testing ? ' 지금은 테스트 목장(테스터 계정)에만 보여요.' : '') }));
     }
     return card;
   }
@@ -16627,6 +16710,39 @@ SR.CONFIG = {
       box.appendChild(el('div', { class: 'btns' }, [btn('고마워요!', 'btn-plum', () => close())]));
       setTimeout(() => { R.confetti(160); sfx('reward'); R.flyScreen(window.innerWidth / 2, window.innerHeight * 0.45, 'coin', '#coinPill', { n: 8, silent: true }); }, 60);
     });
+  });
+
+  /* ---------- v1.6 운영자가 코인을 보냄·회수함(sync) ---------- */
+  bus.on('gift', list => {
+    const got = (list || []).filter(c => c && c.coins);
+    if (!got.length) return;
+    const net = got.reduce((t, c) => t + c.applied, 0);
+    const plus = got.some(c => c.coins > 0), minus = got.some(c => c.coins < 0);
+    UI.updateHud(true);
+    UI.refresh();
+    UI.modal((box, close) => {
+      box.appendChild(el('div', { class: 'ribbon ' + (minus ? '' : 'gold'), text: minus ? '알림' : '선물 도착' }));
+      box.appendChild(el('h2', { text: plus && minus ? '운영자가 코인을 조정했어요' : minus ? '운영자가 코인을 회수했어요' : '운영자가 코인을 보냈어요!' }));
+      box.appendChild(el('div', { class: 'big-num', id: 'giftTotal', style: 'font-size:44px', text: (net < 0 || (minus && !plus) ? '-' : '+') + U.fmt(Math.abs(net)) + '코인' }));
+      const lst = el('div', { class: 'cb-list', id: 'giftList' });
+      got.slice(0, 5).forEach(c => lst.appendChild(el('div', { class: 'row spread nowrap' }, [
+        el('span', { class: 'muted', text: c.reason || (c.coins > 0 ? '신화목장 운영자가 보낸 선물이에요' : '운영자가 코인을 조정했어요') }),
+        chip((c.coins < 0 ? '-' : '+') + U.fmt(Math.abs(c.applied)), c.coins > 0 ? 'gold' : 'gray', 'coin')
+      ])));
+      if (got.length > 5) lst.appendChild(el('p', { class: 'muted', style: 'margin:0', text: '외 ' + (got.length - 5) + '건' }));
+      box.appendChild(lst);
+      if (got.some(c => c.coins < 0 && c.applied !== c.coins)) box.appendChild(el('p', { class: 'muted', style: 'text-align:center;margin:0', text: '가지고 있던 코인까지만 빠졌어요.' }));
+      box.appendChild(el('p', { class: 'muted', style: 'text-align:center;margin:0', text: minus && !plus ? '궁금한 점은 ' + C.STORE_NAME + ' 톡톡으로 문의해 주세요.' : '게임 코인은 돈이나 실제 상품으로 바꿀 수 없어요.' }));
+      box.appendChild(el('div', { class: 'btns' }, [btn(minus && !plus ? '확인' : '고마워요!', minus && !plus ? 'btn' : 'btn-orange', () => close())]));
+      if (net > 0) setTimeout(() => { R.confetti(140); sfx('reward'); R.flyScreen(window.innerWidth / 2, window.innerHeight * 0.45, 'coin', '#coinPill', { n: 8, silent: true }); }, 60);
+    });
+  });
+  /* ---------- v1.6 운영자가 이 계정을 테스터로 지정·해제함(sync) ---------- */
+  bus.on('tester', on => {
+    UI.refresh();
+    if (!UI.started) return;
+    if (on) UI.toast('테스터로 지정됐어요 · [설정]에 테스트 도구가 생겼어요', 'gold', 'hammer');
+    else if (!S.g.flags.tester) UI.toast('테스터 지정이 해제됐어요', '', 'info');
   });
 
   /* ---------- KST 날짜(서버 시계 기준) ---------- */
@@ -17041,6 +17157,7 @@ SR.CONFIG = {
       row('누적 매출', U.fmt(g.stats.revenue)); row('누적 지출', U.fmt(g.stats.cost)); row('배송 완료', U.fmt(g.stats.deliveries) + '건');
       row('모은 계란', U.fmt(g.stats.eggs) + '개'); row('짠 우유', U.fmt(g.stats.milk) + '병'); row('출하한 가축', U.fmt(g.stats.shipped) + '마리'); row('만든 가공품', U.fmt(g.stats.crafted) + '개');
       row('구매 적립으로 받은 코인', U.fmt(g.cashback.total) + ' 코인');
+      if (g.gifts.total > 0) row('운영자에게 받은 코인', U.fmt(g.gifts.total) + ' 코인');
       body.appendChild(el('div', { class: 'sec-title', text: '최근 7일 매출' }));
       const keys = [];
       for (let i = 6; i >= 0; i--) keys.push(U.dayKey(Date.now() - i * 86400000));
@@ -17052,7 +17169,7 @@ SR.CONFIG = {
       body.appendChild(kv);
       const best = Object.entries(g.stats.best).sort((a, b) => b[1] - a[1]);
       if (best.length) {
-        const names = { delivery: '주문 배송', market: '시장 판매', bonus: '여우·쥐 퇴치 보너스', store: '스토어 방문 보상(종료)', cashback: '구매 적립' };   // store: v1.2에 받은 기록만
+        const names = { delivery: '주문 배송', market: '시장 판매', bonus: '여우·쥐 퇴치 보너스', store: '스토어 방문 보상(종료)', cashback: '구매 적립', gift: '운영자 선물' };   // store: v1.2에 받은 기록만
         body.appendChild(el('div', { class: 'sec-title', text: '수입원' }));
         best.forEach(([k, v]) => body.appendChild(el('div', { class: 'row spread' }, [el('span', { text: names[k] || k }), chip(U.fmt(v), 'gold', 'coin')])));
       }
@@ -17093,7 +17210,9 @@ SR.CONFIG = {
       ])]));
       const nv = naverCard(g);
       if (nv) body.appendChild(nv);
-      if (g.flags.tester) body.appendChild(testerCard(g));
+      const app = appCard();
+      if (app) body.appendChild(app);
+      if (S.isTester()) body.appendChild(testerCard(g));
       body.appendChild(storeLink(C.STORE_NAME + ' 바로가기', 'btn-blue'));
       const resetLead = '목장·코인·가축이 모두 사라지고 되돌릴 수 없어요.' + (g.net.linked && !g.net.moved ? ' 네이버 계정에 보관된 진행 기록도 새 목장으로 바뀌어요.' : '');
       body.appendChild(el('div', { class: 'row spread' }, [
@@ -17102,13 +17221,47 @@ SR.CONFIG = {
       ]));
     }
   };
-  /* 테스트 목장 전용 도구(운영자 테스트 링크로 연 목장에만 보임) */
+  /* v1.5 바탕화면(홈 화면)에 설치 — 브라우저가 설치 창을 허락하면 버튼, 아니면 기기별로 직접 하는 방법.
+   * 설치한 앱으로 열려 있으면 보이지 않는다 */
+  function appCard() {
+    const A = SR.App;
+    if (!A || A.standalone()) return null;
+    const card = el('div', { class: 'card app-card', id: 'appCard', style: 'flex-direction:column;align-items:stretch;gap:8px' });
+    const badge = el('span', { class: 'app-badge' }, [el('img', { alt: '', src: R.portraitURL({ kind: 'animal', species: 'cow', stage: 2 }, 'happy', 44) })]);
+    const head = (title, sub) => el('div', { class: 'row nowrap' }, [badge, el('div', { class: 'grow' }, [el('h3', { text: title }), sub ? el('p', { class: 'muted', text: sub }) : null])]);
+    if (A.installedNow) { card.appendChild(head('바탕화면에 설치했어요', '이제 바탕화면(홈 화면)의 신화목장 아이콘을 눌러 바로 열 수 있어요.')); return card; }
+    const pf = A.platform();
+    if (A.canPrompt()) {
+      card.appendChild(head('바탕화면에 설치하기', '설치하면 아이콘을 눌러 앱처럼 바로 열 수 있어요. 주소창 없이 화면을 넓게 쓰고, 진행 기록은 그대로예요.'));
+      card.appendChild(btn('바탕화면에 설치', 'btn-orange', () => {
+        A.install().then(o => { if (o === 'dismissed') UI.toast('나중에 여기서 다시 설치할 수 있어요', '', 'info'); UI.refresh(); });
+      }, { icon: 'plus', id: 'appInstallBtn' }));
+      return card;
+    }
+    if (pf === 'inapp') {
+      const N = SR.Net;
+      card.appendChild(head('바탕화면에 설치하기', '지금은 네이버·카카오톡 같은 앱 안의 브라우저로 열려 있어서 설치할 수 없어요. 화면 위나 아래 메뉴(⋮ 또는 ···)에서 「다른 브라우저로 열기」를 눌러 크롬이나 사파리에서 연 뒤 설치해 주세요.'));
+      card.appendChild(el('p', { class: 'muted app-note', text: '앱 안 브라우저와 크롬·사파리는 진행 기록이 따로 저장돼요.' + (N && (N.naverAvailable() || S.g.net.linked) ? ' 옮기기 전에 위의 [네이버 로그인]으로 목장을 보관해 두면 그쪽에서 이어서 할 수 있어요.' : '') }));
+      return card;
+    }
+    const how = {
+      ios: 'Safari 아래쪽(아이패드는 위쪽)의 공유 버튼(네모에 위 화살표)을 누르고 「홈 화면에 추가」를 눌러 주세요. 홈 화면 아이콘으로 열면 사파리에서 하던 목장이 그대로 열려요.',
+      android: '크롬 오른쪽 위 ⋮ 메뉴에서 「홈 화면에 추가」 또는 「앱 설치」를 눌러 주세요.',
+      desktop: '크롬·엣지 주소창 오른쪽 끝의 설치 아이콘을 누르거나, ⋮ 메뉴에서 「앱 설치」가 들어간 항목을 눌러 주세요. 이미 설치했다면 바탕화면이나 시작 메뉴의 신화목장 아이콘으로 열면 돼요.'
+    }[pf] || '';
+    card.appendChild(head('바탕화면에 설치하기', how));
+    return card;
+  }
+
+  /* 테스트 목장 전용 도구 — 운영자가 서버 시트에서 테스터로 지정한 계정(v1.6), 또는 운영자 테스트 링크로 연 목장에만 보임 */
   function testerCard(g) {
     const act = (label, cls, fn) => btn(label, cls + ' btn-sm', () => { fn(); S.save(); UI.updateHud(true); UI.refresh(); });
-    return el('div', { class: 'card', style: 'flex-direction:column;align-items:stretch;gap:8px;border:2px dashed #C9962A' }, [
+    const note = g.flags.testerSrv ? '운영자가 테스터로 지정한 계정이에요. 아래 도구로 코인·레벨을 바꿔 가며 시험해 볼 수 있어요. 지정이 해제되면 이 도구는 사라져요.'
+      : '운영자 테스트 링크로 연 목장이에요. 이 목장의 구매 적립 신청에는 서버에서 플래그가 붙어 자동 승인되지 않아요(운영자가 직접 확인).';
+    return el('div', { class: 'card', id: 'testerCard', style: 'flex-direction:column;align-items:stretch;gap:8px;border:2px dashed #C9962A' }, [
       el('div', { class: 'row nowrap' }, [ico('hammer', 32), el('div', { class: 'grow' }, [
         el('h3', { text: '테스트 도구' }),
-        el('p', { class: 'muted', text: '운영자 테스트 링크로 연 목장이에요. 이 목장의 구매 적립 신청에는 서버에서 플래그가 붙어 자동 승인되지 않아요(운영자가 직접 확인).' })
+        el('p', { class: 'muted', text: note })
       ])]),
       el('div', { class: 'row' }, [
         act('코인 +100만', 'btn-orange', () => { g.coins += 1000000; sfx('coin'); UI.toast('코인 +1,000,000', 'gold', 'coin'); }),
@@ -17162,6 +17315,7 @@ SR.CONFIG = {
       ['map', '지도·확대', '오른쪽 [+]·[−] 버튼이나 두 손가락으로 확대·축소하고, [전체]로 목장 전체를 봐요. 왼쪽 [지도]를 누르면 각 목장으로 바로 가요.'],
       ['store', '스토어', '[스토어]에서 ' + C.STORE_NAME + '로 바로 갈 수 있어요. 스토어에서 산 주문을 [구매 적립]에 신청하면 확인 후 결제금액의 ' + fmtPct(SR.Net.info && SR.Net.info.purchase ? SR.Net.info.purchase.ratePct : 5) + '를 코인으로 드려요. 게임 코인은 돈이나 실물로 바꿀 수 없어요.']
     ];
+    items.push(['plus', '바탕화면에 설치', '[설정 → 기본]의 「바탕화면에 설치하기」로 PC·휴대폰 바탕화면(홈 화면)에 신화목장 아이콘을 만들 수 있어요. 아이콘을 누르면 앱처럼 바로 열리고, 진행 기록은 그대로예요.']);
     if (SR.Net.naverAvailable() || S.g.net.linked) items.push(['lock', '네이버 로그인', '[설정 → 기본]에서 네이버로 로그인하면 진행 기록이 서버에 보관돼요. 휴대폰을 바꿔도 같은 네이버 계정으로 로그인하면 이어서 할 수 있어요. 한 번에 한 기기에서만 이어서 할 수 있어요.']);
     items.forEach(([ic, t, d]) => body.appendChild(el('div', { class: 'card' }, [ico(ic, 40), el('div', { class: 'grow' }, [el('h3', { text: t }), el('p', { class: 'muted', text: d })])])));
     body.appendChild(btn('처음 안내 다시 보기', 'btn-ghost', () => { UI.close(); UI.tutorialRestart(); }));
@@ -17369,7 +17523,8 @@ SR.CONFIG = {
 
 
 /* ==== game/07_net.js ==== */
-/* 서버 통신 — Apps Script 웹앱(헤더 없는 POST, text/plain) · v1.2 구매 적립 · v1.4 네이버 로그인·진행 기록 보관 */
+/* 서버 통신 — Apps Script 웹앱(헤더 없는 POST, text/plain) · v1.2 구매 적립 · v1.4 네이버 로그인·진행 기록 보관
+ * · v1.6 운영자 코인 지급(gifts/giftAck)·서버가 지정한 테스터(account.tester) */
 (function () {
   'use strict';
   const U = SR.U, S = SR.S, C = SR.CONFIG, bus = SR.bus;
@@ -17465,9 +17620,20 @@ SR.CONFIG = {
     if (N.skew) N.skew -= d;
     lastInput += d;
   };
+  /** 서버가 정한 테스터 여부(운영자가 [플레이어] 시트에서 지정·해제) → 이 목장에 표시. 바뀌었을 때만 저장·알림 */
+  N.setTesterSrv = function (on) {
+    const f = S.g.flags;
+    if (!!f.testerSrv === !!on) return false;
+    if (on) f.testerSrv = 1; else delete f.testerSrv;
+    S.save();
+    bus.emit('tester', !!on);
+    return true;
+  };
   /**
    * 동기화. 응답의 credits(받을 구매 적립 코인)는 신청번호마다 한 번만 더하고, 더한 번호는 다음 동기화의 ack 로 보낸다.
    * throttled 응답에도 credits·acked 가 올 수 있다.
+   * v1.6: gifts:1(운영자 코인 지급을 받을 수 있음)을 알리고, 응답 gifts 는 지급번호마다 한 번만 반영 → 다음 동기화의 giftAck.
+   *       account.tester(서버가 정한 테스터 여부)를 이 목장에 반영. 화면을 떠날 때(beacon)는 응답을 못 받으니 gifts:1 을 보내지 않는다.
    */
   N.sync = function (mode) {
     const net = S.g.net;
@@ -17477,6 +17643,9 @@ SR.CONFIG = {
     const body = { action: 'sync', playerId: net.playerId, token: net.token, sessionId: sessionId, playSec: sent, stats: stats(), clientTime: Date.now(), v: C.VERSION };
     const ack = SR.Sim.ackList();
     if (ack.length) body.ack = ack;
+    const gack = SR.Sim.giftAckList();
+    if (gack.length) body.giftAck = gack;
+    if (mode !== 'beacon') body.gifts = 1;
     if (mode === 'beacon') {
       try { if (navigator.sendBeacon) navigator.sendBeacon(C.SERVER_URL, JSON.stringify(body)); } catch (e) { /* 무시 */ }
       return Promise.resolve(null);
@@ -17495,9 +17664,17 @@ SR.CONFIG = {
             net.linked = r.account.linked; if (!net.linked) net.saveAt = 0;
             S.save(); bus.emit('netLinked', net.linked);
           }
+          // 서버가 정한 테스터 여부(예전 서버는 이 값을 보내지 않음 → 그대로 둠)
+          if (r.account && typeof r.account.tester === 'boolean') N.setTesterSrv(r.account.tester);
           // 지급완료로 처리된 번호는 ack 목록에서 빼고, 새 적립 코인은 신청번호마다 한 번만 받는다
+          let got = 0;
           if (Array.isArray(r.acked)) SR.Sim.applyAcked(r.acked);
-          if (Array.isArray(r.credits) && r.credits.length) SR.Sim.applyCredits(r.credits);
+          if (Array.isArray(r.credits) && r.credits.length) got += SR.Sim.applyCredits(r.credits).length;
+          // 운영자 코인 지급도 지급번호마다 한 번만
+          if (Array.isArray(r.giftAcked)) SR.Sim.applyGiftAcked(r.giftAcked);
+          if (Array.isArray(r.gifts) && r.gifts.length) got += SR.Sim.applyGifts(r.gifts).length;
+          // 받은 코인이 이 기기에만 남지 않게, 네이버에 연결된 목장은 바로 진행 기록을 올린다
+          if (got && net.linked && !net.moved) setTimeout(() => { try { N.uploadSave(); } catch (e) { /* 무시 */ } }, 1500);
           bus.emit('netAccount', N.account);
         } else if (r && r.error === 'AUTH') onAuthFail();
         else if (r && r.error === 'MOVED') N.markMoved();
@@ -17558,8 +17735,8 @@ SR.CONFIG = {
    *  · 다른 기기에서 같은 네이버 계정으로 이어하면 이 기기 토큰이 무효 → 서버가 MOVED → 이 기기는 보내기를 멈춤(moved).
    * ========================================================= */
   N.naverInfo = () => (N.info && N.info.naver) || { clientId: '', open: false, flow: 'token' };
-  /** 이 목장에 네이버 로그인 버튼을 보일까 (모두에게 열렸거나, 운영자 테스트 목장) */
-  N.naverAvailable = () => N.enabled() && !!N.naverInfo().clientId && (N.naverInfo().open || !!(S.g && S.g.flags.tester));
+  /** 이 목장에 네이버 로그인 버튼을 보일까 (모두에게 열렸거나, 테스트 목장 — 서버가 지정한 테스터·운영자 테스트 링크) */
+  N.naverAvailable = () => N.enabled() && !!N.naverInfo().clientId && (N.naverInfo().open || S.isTester());
   /** 서버가 구매 적립에 네이버 로그인을 요구하는가 */
   N.naverRequired = () => N.enabled() && !!N.naverInfo().clientId && N.naverInfo().open;
   /** 네이버가 돌려보낼 주소 = 지금 게임 주소(…/index.html 이면 폴더 주소로) — 개발자센터 Callback URL 과 같아야 함 */
@@ -17708,6 +17885,56 @@ SR.CONFIG = {
     });
     window.addEventListener('pagehide', () => N.sync('beacon'));
   };
+})();
+
+
+/* ==== game/07b_app.js ==== */
+/* v1.5 바탕화면(홈 화면)에 설치 — 웹 앱(PWA)
+ * · 크롬·엣지(PC·안드로이드): 설치할 수 있게 되면 브라우저가 beforeinstallprompt 를 보낸다 → 그 이벤트를 기억해 두고
+ *   제목 화면·[설정]의 [바탕화면에 설치] 버튼에서 연다. 기본 동작은 막지 않는다(크롬 자체 설치 안내도 그대로).
+ * · 아이폰(사파리)·인앱 브라우저(네이버·카카오톡 등)는 이 이벤트가 없어서 직접 하는 방법을 안내한다.
+ *   아이폰은 홈 화면 아이콘이 사파리로 열리게 둔다(manifest display=minimal-ui — 사파리와 저장소를 같이 써서 하던 목장 그대로).
+ * · 서비스 워커(sw.js)는 실제 사이트(https)에서만 등록한다(파일로 열거나 미리보기에서는 하지 않음). */
+(function () {
+  'use strict';
+  const S = SR.S, bus = SR.bus;
+  const A = SR.App = { prompt: null, installedNow: false };
+  const mq = q => { try { return !!(window.matchMedia && window.matchMedia(q).matches); } catch (e) { return false; } };
+  /** 설치한 앱(바탕화면 아이콘)으로 열려 있는가 */
+  A.standalone = () => mq('(display-mode: standalone)') || mq('(display-mode: fullscreen)') || mq('(display-mode: minimal-ui)') || window.navigator.standalone === true;
+  /** 'ios' | 'android' | 'desktop' · 인앱 브라우저면 'inapp' */
+  A.platform = function () {
+    const ua = navigator.userAgent || '';
+    if (/KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\/|everytimeApp|DaumApps|BAND\//i.test(ua)) return 'inapp';
+    if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && (navigator.maxTouchPoints || 0) > 1)) return 'ios';
+    if (/Android/.test(ua)) return 'android';
+    return 'desktop';
+  };
+  A.canPrompt = () => !!A.prompt;
+  /** 브라우저 설치 창 열기 → 'accepted' | 'dismissed' | null(열 수 없음) */
+  A.install = function () {
+    const p = A.prompt;
+    if (!p) return Promise.resolve(null);
+    A.prompt = null;                       // 한 번만 쓸 수 있다
+    let r;
+    try { r = p.prompt(); } catch (e) { bus.emit('appInstall'); return Promise.resolve(null); }
+    return Promise.resolve(r).then(() => p.userChoice).then(c => {
+      bus.emit('appInstall');
+      return c && c.outcome ? c.outcome : null;
+    }, () => { bus.emit('appInstall'); return null; });
+  };
+  window.addEventListener('beforeinstallprompt', e => { A.prompt = e; bus.emit('appInstall'); });
+  window.addEventListener('appinstalled', () => {
+    A.prompt = null; A.installedNow = true;
+    try { if (S.g) { S.g.flags.appInstalled = 1; S.save(); } } catch (e) { /* 무시 */ }
+    bus.emit('appInstall');
+    bus.emit('toast', { msg: '바탕화면(홈 화면)에 설치했어요! 이제 아이콘을 눌러 바로 열 수 있어요', kind: 'good', icon: 'check' });
+  });
+  // 서비스 워커: https 사이트이고 앱 설명 파일(manifest)이 붙은 배포본에서만
+  if ('serviceWorker' in navigator && location.protocol === 'https:' && document.querySelector('link[rel="manifest"]')) {
+    const reg = () => navigator.serviceWorker.register('sw.js').catch(e => console.warn('서비스 워커 등록 실패', e && e.message));
+    if (document.readyState === 'complete') reg(); else window.addEventListener('load', reg);
+  }
 })();
 
 
@@ -17886,6 +18113,7 @@ SR.CONFIG = {
     bindInput();
     requestAnimationFrame(loop);
     if (C.DEV) window.__SR = SR;
+    titleInstall();
     N.hello().catch(() => {});      // 서버 안내(네이버 로그인 버튼 표시 여부 등)를 시작 전에 받아 둔다
     if (naverRet) { const ret = naverRet; naverRet = null; handleNaverReturn(ret); }
     else if (nvMsg && nvMsg.kind === 'restored') {
@@ -17894,6 +18122,23 @@ SR.CONFIG = {
     }
     checkTester().catch(() => {});
     window.addEventListener('hashchange', () => checkTester().catch(() => {}));
+  }
+
+  /* v1.5 제목 화면의 [바탕화면에 설치] — 브라우저가 설치를 허락했을 때(크롬·엣지)만 보인다 */
+  function titleInstall() {
+    const b = $('#btnInstall'), App = SR.App;
+    if (!b || !App) return;
+    const ic = b.querySelector('.ic20');
+    if (ic) ic.style.backgroundImage = 'url(' + R.iconURL('plus', 20) + ')';
+    const upd = () => { const x = $('#btnInstall'); if (x) x.hidden = !(App.canPrompt() && !App.standalone()); };
+    b.addEventListener('click', () => {
+      App.install().then(o => {
+        if (o === 'dismissed') { const n = $('#titleNote'); if (n) n.textContent = '나중에 [설정 → 기본]에서도 설치할 수 있어요'; }
+        upd();
+      });
+    });
+    bus.on('appInstall', upd);
+    upd();
   }
 
   /* =========================================================
@@ -18017,7 +18262,8 @@ SR.CONFIG = {
 
   /* 운영자 테스트 링크: 주소 끝 #test=비밀값 → SHA-256('shinhwa-ranch-tester:'+비밀값)이 설정의 TESTER_HASH와 같으면
    * 이 브라우저의 목장을 '테스트 목장'으로(코인 100만 + 설정의 테스트 도구). tamper 표시로 서버가 플래그를 달아
-   * 이 목장의 구매 적립 신청은 자동 승인되지 않는다(운영자가 시트에서 확인). */
+   * 이 목장의 구매 적립 신청은 자동 승인되지 않는다(운영자가 시트에서 확인).
+   * v1.6: 링크 없이도 운영자가 서버 [플레이어] 시트에서 '테스터(Y/N)'=Y 로 지정하면 같은 도구가 보인다(07_net N.setTesterSrv). */
   async function checkTester() {
     const m = /(?:^#|&)test=([A-Za-z0-9]{16,64})(?:&|$)/.exec(location.hash || '');
     if (!m) return;
